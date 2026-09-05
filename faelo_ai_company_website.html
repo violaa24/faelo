@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faelo AI - Ask your factory. Get an answer you can act on.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#3B82F6',
+                            dark: '#0F172A',
+                            light: '#F8FAFC',
+                            gray: '#64748B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        /* Custom styles for gradients and specific UI elements */
+        .hero-bg {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+        .mockup-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-modal {
+            color: #64748B;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #0F172A;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#" class="flex items-center gap-2 group">
+                        <div class="w-8 h-8 bg-brand-dark rounded-full flex items-center justify-center text-white font-bold group-hover:bg-brand-blue transition-colors">
+                            <i class="fa-solid fa-industry text-sm"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-brand-dark">FAELO AI</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#product" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">Product</a>
+                    <a href="#about" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">About Us</a>
+                    <button onclick="openModal()" class="bg-brand-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-full font-medium transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg text-sm">
+                        Book a demo
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-brand-dark focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full">
+            <div class="px-4 pt-2 pb-6 space-y-1 shadow-lg">
+                <a href="#product" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">Product</a>
+                <a href="#about" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">About Us</a>
+                <button onclick="openModal()" class="w-full text-left block px-3 py-3 text-base font-medium text-brand-blue hover:bg-blue-50 rounded-md">Book a demo</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg pt-32 pb-20 lg:pt-40 lg:pb-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-brand-blue font-semibold text-xs tracking-wider uppercase mb-6 shadow-sm border border-blue-200">
+                AI Manufacturing Intelligence Copilot
+            </div>
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-brand-dark tracking-tight leading-tight mb-6 max-w-4xl mx-auto">
+                Ask your factory.<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-blue-800">Get an answer you can act on.</span>
+            </h1>
+            <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Faelo connects scattered manufacturing data, unifies the context, and turns operational questions into clear resolution.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="openModal()" class="bg-brand-blue hover:bg-blue-700 text-white px-8 py-3.5 rounded-full font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    Book a Demo
+                </button>
+            </div>
+            
+            <!-- Hero Mockup UI -->
+            <div class="mt-16 max-w-5xl mx-auto relative group perspective">
+                <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 pointer-events-none rounded-xl"></div>
+                <div class="glass-panel rounded-xl overflow-hidden border border-gray-200 mockup-shadow transition-transform duration-500 group-hover:scale-[1.01]">
+                    <!-- Mockup Header -->
+                    <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center gap-2">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                        </div>
+                        <div class="mx-auto bg-white border border-gray-200 rounded text-xs text-gray-400 px-20 py-1 font-mono">faelo.ai/copilot</div>
+                    </div>
+                    <!-- Mockup Content -->
+                    <div class="p-6 bg-white min-h-[300px]">
+                        <div class="flex gap-4 items-start mb-8">
+                            <div class="w-8 h-8 rounded-full bg-brand-dark flex-shrink-0 flex items-center justify-center text-white text-xs">U</div>
+                            <div class="bg-gray-100 rounded-2xl rounded-tl-none p-4 text-sm text-gray-800 shadow-sm border border-gray-100">
+                                Why did the defect rate spike on Line 3 this morning during the packaging phase?
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 items-start">
+                            <div class="w-8 h-8 rounded-full bg-brand-blue flex-shrink-0 flex items-center justify-center text-white text-xs"><i class="fa-solid fa-robot"></i></div>
+                            <div class="flex-1 space-y-4">
+                                <div class="bg-brand-dark text-white rounded-2xl rounded-tl-none p-5 text-sm shadow-md">
+                                    I analyzed the data for Line 3 this morning. The spike in defects correlates with a sudden drop in seal temperature on Packaging Machine B.
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <!-- Card 1 -->
+                                    <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+                                        <div class="text-xs text-red-500 font-semibold mb-1 uppercase tracking-wide">Key Insight</div>
+                                        <div class="text-3xl font-bold text-red-700 mb-2">4.8% <span class="text-sm font-normal text-red-500">Defect Rate</span></div>
+                                        <p class="text-xs text-red-600 leading-tight">Increased from baseline 1.2% between 08:00 and 10:30 AM.</p>
+                                    </div>
+                                    <!-- Card 2 -->
+                                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 md:col-span-2">
+                                        <div class="text-xs text-brand-blue font-semibold mb-1 uppercase tracking-wide">Root Cause Evidence</div>
+                                        <div class="text-sm text-gray-800 mb-3">Temperature logged on Sensor T-42 dropped below the minimum threshold of 180°C.</div>
+                                        <div class="w-full bg-blue-200 rounded-full h-2 mb-1">
+                                            <div class="bg-brand-blue h-2 rounded-full" style="width: 35%"></div>
+                                        </div>
+                                        <div class="flex justify-between text-[10px] text-gray-500 font-mono">
+                                            <span>170°C (08:15)</span>
+                                            <span>Target: 185°C</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="product" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-brand-blue font-semibold tracking-wide uppercase text-sm mb-2">How It Works</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-brand-dark mb-4">From one question to one practical next step.</h3>
+                <p class="text-lg text-gray-500 max-w-2xl mx-auto">A seamless workflow that transforms messy data into structured action.</p>
+            </div>
+
+            <div class="relative">
+                <!-- Vertical Line connecting steps (Desktop) -->
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 transform -translate-x-1/2"></div>
+
+                <!-- Step 1 -->
+                <div class="relative flex flex-col md:flex-row items-center justify-between mb-24">
+                    <div class="md:w-5/12 mb-8 md:mb-0 text-right pr-0 md:pr-12">
+                        <div class="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold mb-4">STEP 01</div>
+                        <h4 class="text-2xl font-bold text-brand-dark mb-3">Ask the factory, directly.</h4>
+                        <p class="text-gray-600 leading-relaxed mb-6">Stop searching across dashboards. Just ask Faelo in plain language. We securely query your ERP, SCADA, and MES systems simultaneously.</p>
+                        <ul class="space-y-2 text-sm text-gray-500 inline-block text-left">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Natural language interface</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Connects to existing data silos</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Center Dot -->
+                    <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full bg-white border-4 border-brand-blue items-center justify-center z-10 shadow-sm">
+                        <div class="w-2 h-2 bg-brand-blue rounded-full"></div>
+                    </div>
+
+                    <div class="md:w-5/12 bg-white rounded-xl shadow-lg border border-gray-100 p-6 w-full">
+                        <div class="flex items-center gap-4">
+                            <!-- Visual representation of data sources mapping -->
+                            <div class="space-y-3 flex-1">
+                                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-xs text-center text-gray-500">ERP Data</div>
+                                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-xs text-center text-gray-500">Sensors</div>
+                                <div class="bg-gray-50 border border-gray-200 rounded p-2 text-xs text-center text-gray-500">Shift Logs</div>
+                            </div>
+                            <div class="flex flex-col justify-center text-gray-300">
+                                <i class="fa-solid fa-arrow-right mb-4"></i>
+                                <i class="fa-solid fa-arrow-right mb-4"></i>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                            <div class="flex-1 bg-brand-dark rounded-lg p-4 text-white text-xs h-full flex items-center shadow-inner">
+                                "Synthesizing data sources to answer: Why is yield down on Line B?"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex flex-col md:flex-row-reverse items-center justify-between mb-24">
+                    <div class="md:w-5/12 mb-8 md:mb-0 pl-0 md:pl-12">
+                        <div class="inline-block px-3 py-1 bg-red-100 text-red-600 rounded text-xs font-bold mb-4">STEP 02</div>
+                        <h4 class="text-2xl font-bold text-brand-dark mb-3">Diagnose with evidence.</h4>
+                        <p class="text-gray-600 leading-relaxed mb-6">Faelo correlates the data and highlights the most probable root causes based on historical patterns and current deviations, not just guesses.</p>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-chart-line text-red-500"></i> Anomaly detection</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-link text-red-500"></i> Multi-variable correlation</li>
+                        </ul>
+                    </div>
+
+                    <!-- Center Dot -->
+                    <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full bg-white border-4 border-red-500 items-center justify-center z-10 shadow-sm">
+                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    </div>
+
+                    <div class="md:w-5/12 bg-white rounded-xl shadow-lg border border-gray-100 p-6 w-full">
+                         <!-- Visual representation of diagnostics -->
+                         <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-mono text-gray-400 w-12">Temp</span>
+                                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                                    <div class="bg-gray-300 w-1/2 h-full"></div>
+                                    <div class="bg-red-500 w-1/4 h-full animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-mono text-gray-400 w-12">Speed</span>
+                                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                                    <div class="bg-brand-blue w-3/4 h-full"></div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-red-50 rounded border border-red-100 text-xs text-red-700">
+                                <strong>High Correlation (92%):</strong> Temperature drop aligns precisely with increased rejection events.
+                            </div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex flex-col md:flex-row items-center justify-between">
+                    <div class="md:w-5/12 mb-8 md:mb-0 text-right pr-0 md:pr-12">
+                        <div class="inline-block px-3 py-1 bg-green-100 text-green-600 rounded text-xs font-bold mb-4">STEP 03</div>
+                        <h4 class="text-2xl font-bold text-brand-dark mb-3">Act with the right owner.</h4>
+                        <p class="text-gray-600 leading-relaxed mb-6">Turn answers into action immediately. Faelo can generate standard operating procedures (SOPs), draft maintenance tickets, or alert the right team.</p>
+                        <ul class="space-y-2 text-sm text-gray-500 inline-block text-left">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-arrow-right text-green-500"></i> Direct integration to ticketing</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-file-contract text-green-500"></i> Automated SOP generation</li>
+                        </ul>
+                    </div>
+
+                    <!-- Center Dot -->
+                    <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full bg-white border-4 border-green-500 items-center justify-center z-10 shadow-sm">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    </div>
+
+                    <div class="md:w-5/12 bg-white rounded-xl shadow-lg border border-gray-100 p-6 w-full">
+                        <!-- Visual representation of action -->
+                        <div class="flex flex-col items-center space-y-4">
+                            <div class="flex items-center justify-between w-full p-3 border border-gray-100 rounded-lg bg-gray-50">
+                                <div class="text-sm font-medium text-gray-700">Generate Maintenance Ticket</div>
+                                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-down text-gray-300"></i>
+                            <div class="w-full bg-green-50 border border-green-200 rounded-lg p-4 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-16 h-16 bg-green-100 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+                                <div class="relative z-10">
+                                    <div class="flex items-center gap-2 text-green-700 mb-2">
+                                        <i class="fa-solid fa-circle-check text-lg"></i>
+                                        <span class="font-bold text-sm">Action Created</span>
+                                    </div>
+                                    <p class="text-xs text-green-600">Ticket #WO-8492 dispatched to Maintenance Team B regarding Heater Element on Line 3.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Prop Section -->
+    <section class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl md:text-4xl font-bold text-brand-dark mb-4 leading-tight">Built to shorten the path <br>from question to action.</h2>
+                </div>
+                <div class="max-w-md mt-4 md:mt-0 text-gray-600 text-sm border-l-2 border-brand-blue pl-4">
+                    Faelo resolves the bottleneck between finding a problem and fixing it, empowering every level of factory operations.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-brand-blue transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-blue mb-6">
+                        <i class="fa-solid fa-database text-lg"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-3 leading-tight">Ask questions, <br>not query</h4>
+                    <p class="text-sm text-gray-500 mb-6">Skip the complex dashboards and SQL. Ask natural language queries to instantly retrieve data from across your stack.</p>
+                    <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-400">BENEFIT</span>
+                        <div class="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">01</div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-red-400 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-500 mb-6">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-3 leading-tight">Diagnose with <br>context in seconds</h4>
+                    <p class="text-sm text-gray-500 mb-6">Faelo cross-references machine data, shift logs, and quality reports to surface hidden correlations and root causes.</p>
+                    <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-400">BENEFIT</span>
+                        <div class="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">02</div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-green-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600 mb-6">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-3 leading-tight">Move from insight <br>to action</h4>
+                    <p class="text-sm text-gray-500 mb-6">Stop passing reports around. Generate work orders, adjust setpoints, or update SOPs directly from the insight.</p>
+                    <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-400">BENEFIT</span>
+                        <div class="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">03</div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-3 leading-tight">Built for enterprise <br>security</h4>
+                    <p class="text-sm text-gray-500 mb-6">SOC2 type 2 compliant architecture ensures your proprietary manufacturing data never trains public models.</p>
+                    <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-400">BENEFIT</span>
+                        <div class="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">04</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-brand-dark rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-blue rounded-full opacity-20 blur-3xl pointer-events-none"></div>
+                <div class="mb-6 md:mb-0 relative z-10">
+                    <h4 class="text-xl font-bold mb-2">Ready to see it on your data?</h4>
+                    <p class="text-gray-300 text-sm">We can set up a secure proof of concept in days, not months.</p>
+                </div>
+                <button onclick="openModal()" class="whitespace-nowrap bg-white text-brand-dark hover:bg-gray-100 px-6 py-3 rounded-full font-bold text-sm transition-colors relative z-10 shadow-md">
+                    Schedule Technical Review
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Personas Section -->
+    <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row gap-12 items-center mb-16">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold text-brand-dark mb-6 leading-tight">Built for the people making factory decisions every day.</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Data scientists shouldn't be the only ones who can query factory records. Faelo puts the power of advanced analytics in the hands of the frontline—production supervisors, maintenance leads, and plant managers.
+                    </p>
+                </div>
+                <div class="md:w-1/2 bg-brand-dark rounded-xl p-8 text-white relative shadow-lg">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500 rounded-bl-full opacity-20"></div>
+                    <div class="text-xs font-bold text-blue-300 uppercase tracking-wide mb-3">Core Philosophy</div>
+                    <h3 class="text-2xl font-bold mb-4 leading-snug">"Make answers immediate, analysis transparent, and action effortless."</h3>
+                </div>
+            </div>
+
+            <!-- UI Mockup 2 -->
+            <div class="mt-12 bg-gray-50 rounded-2xl p-4 md:p-8 border border-gray-200">
+                <div class="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider text-center">Use Case: Shift Handover & Morning Meetings</div>
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row h-auto md:h-[500px]">
+                    <!-- Sidebar -->
+                    <div class="w-full md:w-64 bg-brand-dark text-white p-4 flex flex-col">
+                        <div class="flex items-center gap-2 mb-8 px-2 mt-2">
+                            <i class="fa-solid fa-industry"></i>
+                            <span class="font-bold tracking-wide">FAELO Workspace</span>
+                        </div>
+                        <nav class="space-y-1 flex-1">
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/10 text-white"><i class="fa-solid fa-message w-4"></i> Chat</a>
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5"><i class="fa-solid fa-chart-pie w-4"></i> Dashboards</a>
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5"><i class="fa-solid fa-list-check w-4"></i> Actions</a>
+                        </nav>
+                        <div class="mt-auto border-t border-gray-700 pt-4 px-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded bg-gray-600"></div>
+                                <div class="text-xs">
+                                    <div class="font-semibold">Plant Manager</div>
+                                    <div class="text-gray-400">Chicago Facility</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Main Area -->
+                    <div class="flex-1 p-6 overflow-y-auto bg-gray-50/50">
+                        <div class="max-w-3xl mx-auto space-y-6">
+                            <!-- User Message -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm mt-1">U</div>
+                                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-800">
+                                    Summarize last night's shift performance for the morning meeting. Highlight any major downtime events.
+                                </div>
+                            </div>
+                            
+                            <!-- AI Response -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center text-white font-bold text-sm mt-1"><i class="fa-solid fa-robot"></i></div>
+                                <div class="flex-1 space-y-4">
+                                    <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-800">
+                                        <p class="font-semibold mb-2">Shift 3 Summary (22:00 - 06:00)</p>
+                                        <p class="mb-3">Overall OEE was 72%, below the target of 80%. This was primarily driven by a significant downtime event on Assembly Line A.</p>
+                                        
+                                        <!-- Mini Dashboard in chat -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                            <div class="p-3 bg-gray-50 rounded border border-gray-100">
+                                                <div class="text-xs text-gray-500">OEE</div>
+                                                <div class="text-lg font-bold text-red-500">72% <i class="fa-solid fa-arrow-down text-xs"></i></div>
+                                            </div>
+                                            <div class="p-3 bg-gray-50 rounded border border-gray-100">
+                                                <div class="text-xs text-gray-500">Production</div>
+                                                <div class="text-lg font-bold text-green-600">12,450</div>
+                                            </div>
+                                            <div class="p-3 bg-red-50 rounded border border-red-100 md:col-span-2">
+                                                <div class="text-xs text-red-600 font-semibold">Major Issue</div>
+                                                <div class="text-sm text-red-800">142 mins downtime (Conveyor Jam, Line A)</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="mb-3">The jam occurred at 02:15 AM. Maintenance log indicates sensor misalignment. I've drafted a proactive maintenance check for the day shift.</p>
+                                        
+                                        <button class="bg-brand-blue text-white px-4 py-2 rounded text-xs font-semibold hover:bg-blue-600 transition-colors">
+                                            Review & Approve Maintenance Check
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personas Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+                <!-- Persona 1 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                    <div class="w-20 h-20 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 text-brand-blue text-3xl">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">Plant Managers</h4>
+                    <p class="text-xs text-brand-blue font-semibold mb-3 uppercase tracking-wide">Strategic Oversight</p>
+                    <p class="text-sm text-gray-500">Get immediate answers on overall plant performance without waiting for analysts to build reports.</p>
+                </div>
+                <!-- Persona 2 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                    <div class="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600 text-3xl">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">Quality Engineers</h4>
+                    <p class="text-xs text-green-600 font-semibold mb-3 uppercase tracking-wide">Root Cause Analysis</p>
+                    <p class="text-sm text-gray-500">Instantly correlate quality defects with process parameters across thousands of variables.</p>
+                </div>
+                <!-- Persona 3 -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+                    <div class="w-20 h-20 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4 text-orange-600 text-3xl">
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">Maintenance Leads</h4>
+                    <p class="text-xs text-orange-600 font-semibold mb-3 uppercase tracking-wide">Rapid Resolution</p>
+                    <p class="text-sm text-gray-500">Quickly identify machine failure histories and auto-generate detailed repair SOPs based on past data.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-24 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-sm font-bold text-brand-blue tracking-widest uppercase mb-2">Frequently Asked Questions</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-brand-dark">Clear answers before the first conversation.</h3>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-semibold text-brand-dark text-lg">Do I need a perfectly organized data lake to use Faelo?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+                        No. Faelo is designed to work with messy, fragmented factory data. We connect directly to your existing systems (ERP, SCADA, MES, historians) and use AI to understand the schema and context without requiring a massive data engineering project upfront.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-semibold text-brand-dark text-lg">Is my manufacturing data used to train public AI models?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+                        Absolutely not. Faelo operates on a strict enterprise security model. Your data remains yours. It is processed in isolated, secure instances and is never used to train generalized public models. We are SOC2 compliant and prioritize data sovereignty.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-semibold text-brand-dark text-lg">How is this different from my existing BI dashboards?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+                        Dashboards tell you *what* happened, provided you know where to look. Faelo tells you *why* it happened and *what to do next*. It replaces the manual process of hunting through multiple graphs to find a correlation by allowing you to ask direct questions and receiving evidence-backed answers.
+                    </div>
+                </div>
+                
+                 <!-- FAQ Item 4 -->
+                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-semibold text-brand-dark text-lg">What types of factory systems can you connect to?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+                        We support standard industrial protocols (OPC UA, MQTT), direct database connections (SQL, Postgres, Oracle), and APIs for major ERPs (SAP, Oracle) and MES systems. We can also parse unstructured data like PDF maintenance logs or shift handover notes.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark text-white pt-20 pb-10" id="about">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-brand-dark font-bold">
+                            <i class="fa-solid fa-industry text-sm"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-white">FAELO AI</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Manufacturing intelligence that turns fragmented factory data into clear, evidence-backed action.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fa-brands fa-linkedin text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fa-brands fa-twitter text-xl"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-sm tracking-wider uppercase mb-5">Product</h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Capabilities</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">How it works</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Security</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Integrations</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-sm tracking-wider uppercase mb-5">Company</h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-brand-blue transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-sm tracking-wider uppercase mb-5">Global Markets</h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-xs text-gray-500"></i> United States</span></li>
+                        <li><span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-xs text-gray-500"></i> Indonesia</span></li>
+                        <li><span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-xs text-gray-500"></i> Europe</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Faelo AI. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-gray-300">Privacy Policy</a>
+                    <a href="#" class="hover:text-gray-300">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Book Demo Modal -->
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            
+            <div class="bg-white rounded-xl overflow-hidden shadow-2xl relative">
+                <!-- Top Decorative Border -->
+                <div class="h-2 w-full bg-gradient-to-r from-brand-blue to-blue-400 absolute top-0 left-0"></div>
+                
+                <div class="p-8 md:p-12 h-[80vh] overflow-y-auto">
+                    <div class="mb-10 text-center max-w-2xl mx-auto">
+                        <h2 class="text-sm font-bold text-brand-blue tracking-widest uppercase mb-3">Book a Demo</h2>
+                        <h3 class="text-3xl md:text-4xl font-bold text-brand-dark mb-4 leading-tight">Tell us what your factory needs to solve.</h3>
+                        <p class="text-gray-600 text-sm">
+                            Share your team, manufacturing context, and one recurring operational question. We will tailor the demo around the outcome that matters to you.
+                        </p>
+                    </div>
+
+                    <form id="demoForm" class="max-w-3xl mx-auto" onsubmit="submitForm(event)">
+                        
+                        <div class="mb-8 border-b border-gray-100 pb-4">
+                            <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-1">01 Contact</h4>
+                            <p class="text-xs text-gray-500">Basic information to reach you.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">First name *</label>
+                                <input type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="John">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Last name *</label>
+                                <input type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Work email *</label>
+                                <input type="email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="name@company.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone / WhatsApp</label>
+                                <input type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="+1 ...">
+                            </div>
+                        </div>
+
+                        <div class="mb-8 border-b border-gray-100 pb-4 mt-12">
+                            <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-1">02 Company</h4>
+                            <p class="text-xs text-gray-500">Tell us about your organization.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Job title *</label>
+                                <input type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="e.g. Plant Manager, VP Operations">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Company name *</label>
+                                <input type="text" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm" placeholder="Company Inc.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Country / Region *</label>
+                                <select required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm bg-white">
+                                    <option value="" disabled selected>Select country</option>
+                                    <option value="US">United States</option>
+                                    <option value="ID">Indonesia</option>
+                                    <option value="UK">United Kingdom</option>
+                                    <option value="EU">Europe (Other)</option>
+                                    <option value="Asia">Asia (Other)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Manufacturing Industry *</label>
+                                <select required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm bg-white">
+                                    <option value="" disabled selected>Select industry</option>
+                                    <option>Automotive</option>
+                                    <option>Food & Beverage</option>
+                                    <option>Electronics</option>
+                                    <option>Pharmaceuticals</option>
+                                    <option>Heavy Machinery</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-8 border-b border-gray-100 pb-4 mt-12">
+                            <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-1">03 Factory Context</h4>
+                            <p class="text-xs text-gray-500">Help us tailor the demonstration.</p>
+                        </div>
+
+                        <div class="space-y-6 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Current data sources *</label>
+                                <select required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm bg-white">
+                                    <option value="" disabled selected>Excel, ERP, QMS, MES, sensors, or other</option>
+                                    <option>Mostly Manual / Excel</option>
+                                    <option>ERP + Basic Sensors</option>
+                                    <option>Full MES / SCADA Integration</option>
+                                    <option>Data Lake / Cloud Historian</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Primary factory challenge *</label>
+                                <select required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm bg-white">
+                                    <option value="" disabled selected>Quality loss, output, downtime, material, maintenance...</option>
+                                    <option>Reducing unplanned downtime</option>
+                                    <option>Improving quality / reducing scrap</option>
+                                    <option>Increasing overall throughput</option>
+                                    <option>Knowledge transfer / workforce training</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">What factory question should Faelo help answer? *</label>
+                                <textarea required rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all text-sm resize-none" placeholder="Example: Why did Line 3 rejection increase after the latest material batch? Include the KPI, line, product, shift, or recurring loss if known."></textarea>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 mt-4">
+                                <input type="checkbox" id="consent" required class="mt-1 h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue cursor-pointer">
+                                <label for="consent" class="text-xs text-gray-500 cursor-pointer">
+                                    I agree that Faelo AI may use this information to contact me about the demo. No live ERP access is required for the first conversation.
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-brand-blue hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-colors shadow-md text-lg mt-4">
+                            Request my demo
+                        </button>
+                        <p class="text-center text-xs text-gray-400 mt-4 pb-8">
+                            Your information is used only to arrange and tailor the demo.
+                        </p>
+                    </form>
+                    
+                    <!-- Success State (Hidden by default) -->
+                    <div id="successState" class="hidden flex flex-col items-center justify-center h-full text-center py-20">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl mb-6">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-dark mb-2">Request Received!</h3>
+                        <p class="text-gray-600 max-w-md mx-auto mb-8">
+                            Thank you for reaching out. Our team will review your factory context and contact you shortly to schedule your tailored demo.
+                        </p>
+                        <button onclick="closeModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg transition-colors">
+                            Close
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-sm');
+            } else {
+                nav.classList.remove('shadow-sm');
+            }
+        });
+
+        // Mobile menu toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('#mobile-menu a, #mobile-menu button').forEach(item => {
+            item.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
+
+        // FAQ Accordion
+        const faqToggles = document.querySelectorAll('.faq-toggle');
+        faqToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('i');
+                
+                // Close all other open FAQs
+                faqToggles.forEach(otherToggle => {
+                    if (otherToggle !== toggle) {
+                        otherToggle.nextElementSibling.classList.add('hidden');
+                        otherToggle.querySelector('i').style.transform = 'rotate(0deg)';
+                    }
+                });
+
+                // Toggle current FAQ
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+
+        // Modal Logic
+        const modal = document.getElementById('demoModal');
+        const form = document.getElementById('demoForm');
+        const successState = document.getElementById('successState');
+
+        function openModal() {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            // Reset form on open
+            form.style.display = 'block';
+            successState.classList.add('hidden');
+            form.reset();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal if clicked outside of it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        function submitForm(e) {
+            e.preventDefault();
+            // Simulate form submission
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                form.style.display = 'none';
+                successState.classList.remove('hidden');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
