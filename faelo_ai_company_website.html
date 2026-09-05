@@ -73,7 +73,7 @@
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 5% auto;
+            margin: 4% auto;
             border-radius: 1rem;
             width: 90%;
             max-width: 800px;
@@ -85,15 +85,46 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Hero mockup fade — only bottom edge, gentler */
+        .hero-fade {
+            background: linear-gradient(to top, rgba(255,255,255,0.6) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        /* FAQ smooth expand */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.2s ease;
+        }
+        .faq-content.open {
+            max-height: 400px;
+        }
+        /* FAQ icon rotation */
+        .faq-toggle .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+        .faq-toggle.open .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        /* Modal close button — properly positioned, no overlap */
         .close-modal {
             color: #64748B;
             position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 28px;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.2s;
+            z-index: 60;
+            line-height: 1;
+            background: white;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .close-modal:hover,
         .close-modal:focus {
@@ -110,9 +141,9 @@
             <div class="flex justify-between items-center h-20">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="#" class="flex items-center gap-2 group">
-                        <div class="w-8 h-8 bg-brand-dark rounded-full flex items-center justify-center text-white font-bold group-hover:bg-brand-blue transition-colors">
-                            <i class="fa-solid fa-industry text-sm"></i>
+                    <a href="#" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-105">
+                            <img src="logo grey blue abs_20260901171029.png" alt="Faelo AI Logo" class="w-full h-full object-contain drop-shadow-sm">
                         </div>
                         <span class="font-bold text-xl tracking-tight text-brand-dark">FAELO AI</span>
                     </a>
@@ -120,8 +151,10 @@
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">Home</a>
                     <a href="#product" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">Product</a>
                     <a href="#about" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">About Us</a>
+                    <a href="#contact" class="text-gray-600 hover:text-brand-dark font-medium transition-colors text-sm">Contact</a>
                     <button onclick="openModal()" class="bg-brand-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-full font-medium transition-all transform hover:-translate-y-0.5 shadow-md hover:shadow-lg text-sm">
                         Book a demo
                     </button>
@@ -129,8 +162,8 @@
 
                 <!-- Mobile menu button -->
                 <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-brand-dark focus:outline-none">
-                        <i class="fa-solid fa-bars text-2xl"></i>
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-brand-dark focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Toggle menu" aria-expanded="false">
+                        <i id="menu-icon" class="fa-solid fa-bars text-2xl transition-all duration-200"></i>
                     </button>
                 </div>
             </div>
@@ -139,8 +172,10 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full">
             <div class="px-4 pt-2 pb-6 space-y-1 shadow-lg">
+                <a href="#" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">Home</a>
                 <a href="#product" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">Product</a>
                 <a href="#about" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">About Us</a>
+                <a href="#contact" class="block px-3 py-3 text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50 rounded-md">Contact</a>
                 <button onclick="openModal()" class="w-full text-left block px-3 py-3 text-base font-medium text-brand-blue hover:bg-blue-50 rounded-md">Book a demo</button>
             </div>
         </div>
@@ -167,7 +202,7 @@
             
             <!-- Hero Mockup UI -->
             <div class="mt-16 max-w-5xl mx-auto relative group perspective">
-                <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 pointer-events-none rounded-xl"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-transparent z-10 pointer-events-none rounded-xl hero-fade"></div>
                 <div class="glass-panel rounded-xl overflow-hidden border border-gray-200 mockup-shadow transition-transform duration-500 group-hover:scale-[1.01]">
                     <!-- Mockup Header -->
                     <div class="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center gap-2">
@@ -355,7 +390,7 @@
     </section>
 
     <!-- Value Prop Section -->
-    <section class="py-24 bg-gray-50">
+    <section id="about" class="py-24 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16">
                 <div class="max-w-2xl">
@@ -560,6 +595,72 @@
         </div>
     </section>
 
+    <!-- Founding Team Section -->
+    <section id="contact" class="py-24 bg-white relative overflow-hidden" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
+        <!-- Faint grid background overlay -->
+        <div class="absolute inset-0 bg-white/80"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="mb-12">
+                <h2 class="text-xs font-bold text-brand-blue tracking-widest uppercase mb-3">Founding Team</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-brand-dark mb-4">Manufacturing, technology, and operations—working as one team.</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <!-- Team Member 1 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="bg-blue-50 rounded-xl h-48 mb-6 flex items-end justify-center overflow-hidden">
+                        <!-- Abstract Avatar SVG matching design -->
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 translate-y-2">
+                            <circle cx="50" cy="35" r="15" fill="#0F172A" />
+                            <path d="M 20 100 Q 20 65, 50 65 Q 80 65, 80 100 Z" fill="#60A5FA" />
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-1">Serafaldo Angga</h4>
+                    <p class="text-sm font-semibold text-brand-blue mb-4">CEO & Co-Founder</p>
+                    <p class="text-xs text-gray-400">Faelo AI</p>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="bg-blue-50 rounded-xl h-48 mb-6 flex items-end justify-center overflow-hidden">
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 translate-y-2">
+                            <circle cx="50" cy="35" r="15" fill="#0F172A" />
+                            <path d="M 20 100 Q 20 65, 50 65 Q 80 65, 80 100 Z" fill="#60A5FA" />
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-1">Edwardus Kevinnul</h4>
+                    <p class="text-sm font-semibold text-brand-blue mb-4">CTO & Co-Founder</p>
+                    <p class="text-xs text-gray-400">Faelo AI</p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="bg-blue-50 rounded-xl h-48 mb-6 flex items-end justify-center overflow-hidden">
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 translate-y-2">
+                            <circle cx="50" cy="35" r="15" fill="#0F172A" />
+                            <path d="M 20 100 Q 20 65, 50 65 Q 80 65, 80 100 Z" fill="#60A5FA" />
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-brand-dark mb-1">Viola Amelia</h4>
+                    <p class="text-sm font-semibold text-brand-blue mb-4">COO & Co-Founder</p>
+                    <p class="text-xs text-gray-400">Faelo AI</p>
+                </div>
+            </div>
+
+            <!-- Operating Principle Banner -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center gap-6">
+                <div class="w-12 h-12 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue shrink-0">
+                    <i class="fa-solid fa-plus text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-brand-blue uppercase tracking-wide mb-1">One shared operating principle</p>
+                    <p class="text-lg font-bold text-brand-dark">Stay close to real workflows, real constraints, and measurable outcomes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- FAQ Section -->
     <section class="py-24 bg-gray-50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -571,45 +672,45 @@
             <div class="space-y-4">
                 <!-- FAQ Item 1 -->
                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                        <span class="font-semibold text-brand-dark text-lg">Do I need a perfectly organized data lake to use Faelo?</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none gap-4">
+                        <span class="font-semibold text-brand-dark text-base md:text-lg">Do I need a perfectly organized data lake to use Faelo?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 flex-shrink-0"></i>
                     </button>
-                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
-                        No. Faelo is designed to work with messy, fragmented factory data. We connect directly to your existing systems (ERP, SCADA, MES, historians) and use AI to understand the schema and context without requiring a massive data engineering project upfront.
+                    <div class="faq-content px-6 text-gray-600 text-sm leading-relaxed border-t border-gray-100">
+                        <div class="py-4">No. Faelo is designed to work with messy, fragmented factory data. We connect directly to your existing systems (ERP, SCADA, MES, historians) and use AI to understand the schema and context without requiring a massive data engineering project upfront.</div>
                     </div>
                 </div>
 
                 <!-- FAQ Item 2 -->
                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                        <span class="font-semibold text-brand-dark text-lg">Is my manufacturing data used to train public AI models?</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none gap-4">
+                        <span class="font-semibold text-brand-dark text-base md:text-lg">Is my manufacturing data used to train public AI models?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 flex-shrink-0"></i>
                     </button>
-                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
-                        Absolutely not. Faelo operates on a strict enterprise security model. Your data remains yours. It is processed in isolated, secure instances and is never used to train generalized public models. We are SOC2 compliant and prioritize data sovereignty.
+                    <div class="faq-content px-6 text-gray-600 text-sm leading-relaxed border-t border-gray-100">
+                        <div class="py-4">Absolutely not. Faelo operates on a strict enterprise security model. Your data remains yours. It is processed in isolated, secure instances and is never used to train generalized public models. We are SOC2 compliant and prioritize data sovereignty.</div>
                     </div>
                 </div>
 
                 <!-- FAQ Item 3 -->
                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                        <span class="font-semibold text-brand-dark text-lg">How is this different from my existing BI dashboards?</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none gap-4">
+                        <span class="font-semibold text-brand-dark text-base md:text-lg">How is this different from my existing BI dashboards?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 flex-shrink-0"></i>
                     </button>
-                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
-                        Dashboards tell you *what* happened, provided you know where to look. Faelo tells you *why* it happened and *what to do next*. It replaces the manual process of hunting through multiple graphs to find a correlation by allowing you to ask direct questions and receiving evidence-backed answers.
+                    <div class="faq-content px-6 text-gray-600 text-sm leading-relaxed border-t border-gray-100">
+                        <div class="py-4">Dashboards tell you <em>what</em> happened, provided you know where to look. Faelo tells you <em>why</em> it happened and <em>what to do next</em>. It replaces the manual process of hunting through multiple graphs to find a correlation by allowing you to ask direct questions and receive evidence-backed answers.</div>
                     </div>
                 </div>
-                
-                 <!-- FAQ Item 4 -->
-                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none">
-                        <span class="font-semibold text-brand-dark text-lg">What types of factory systems can you connect to?</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none gap-4">
+                        <span class="font-semibold text-brand-dark text-base md:text-lg">What types of factory systems can you connect to?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 flex-shrink-0"></i>
                     </button>
-                    <div class="faq-content hidden px-6 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
-                        We support standard industrial protocols (OPC UA, MQTT), direct database connections (SQL, Postgres, Oracle), and APIs for major ERPs (SAP, Oracle) and MES systems. We can also parse unstructured data like PDF maintenance logs or shift handover notes.
+                    <div class="faq-content px-6 text-gray-600 text-sm leading-relaxed border-t border-gray-100">
+                        <div class="py-4">We support standard industrial protocols (OPC UA, MQTT), direct database connections (SQL, Postgres, Oracle), and APIs for major ERPs (SAP, Oracle) and MES systems. We can also parse unstructured data like PDF maintenance logs or shift handover notes.</div>
                     </div>
                 </div>
             </div>
@@ -617,13 +718,13 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-brand-dark text-white pt-20 pb-10" id="about">
+    <footer class="bg-brand-dark text-white pt-20 pb-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                 <div class="col-span-1 md:col-span-1">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-brand-dark font-bold">
-                            <i class="fa-solid fa-industry text-sm"></i>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <img src="logo grey blue abs_20260901171029.png" alt="Faelo AI Logo" class="w-full h-full object-contain">
                         </div>
                         <span class="font-bold text-xl tracking-tight text-white">FAELO AI</span>
                     </div>
@@ -679,11 +780,11 @@
     <!-- Book Demo Modal -->
     <div id="demoModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <span class="close-modal" onclick="closeModal()" aria-label="Close">&times;</span>
             
             <div class="bg-white rounded-xl overflow-hidden shadow-2xl relative">
                 <!-- Top Decorative Border -->
-                <div class="h-2 w-full bg-gradient-to-r from-brand-blue to-blue-400 absolute top-0 left-0"></div>
+                <div class="h-2 w-full bg-gradient-to-r from-brand-blue to-blue-400"></div>
                 
                 <div class="p-8 md:p-12 h-[80vh] overflow-y-auto">
                     <div class="mb-10 text-center max-w-2xl mx-auto">
@@ -808,8 +909,8 @@
                         </p>
                     </form>
                     
-                    <!-- Success State (Hidden by default) -->
-                    <div id="successState" class="hidden flex flex-col items-center justify-center h-full text-center py-20">
+                    <!-- Success State (hidden by default via inline style) -->
+                    <div id="successState" style="display:none;" class="flex flex-col items-center justify-center text-center py-20">
                         <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl mb-6">
                             <i class="fa-solid fa-check"></i>
                         </div>
@@ -829,97 +930,98 @@
 
     <!-- Scripts -->
     <script>
-        // Navbar scroll effect
+        // ── Navbar scroll shadow ──────────────────────────────────────────────
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
-            if (window.scrollY > 20) {
-                nav.classList.add('shadow-sm');
-            } else {
-                nav.classList.remove('shadow-sm');
-            }
+            nav.classList.toggle('shadow-sm', window.scrollY > 20);
         });
 
-        // Mobile menu toggle
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
+        // ── Mobile menu toggle (bars ↔ X) ────────────────────────────────────
+        const mobileBtn  = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon   = document.getElementById('menu-icon');
 
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
+        mobileBtn.addEventListener('click', () => {
+            const isOpen = !mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden', isOpen);
+            menuIcon.classList.toggle('fa-bars',  isOpen);
+            menuIcon.classList.toggle('fa-xmark', !isOpen);
+            mobileBtn.setAttribute('aria-expanded', String(!isOpen));
         });
 
-        // Close mobile menu when clicking a link
+        // Close mobile menu when any link/button inside it is tapped
         document.querySelectorAll('#mobile-menu a, #mobile-menu button').forEach(item => {
             item.addEventListener('click', () => {
-                menu.classList.add('hidden');
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.add('fa-bars');
+                menuIcon.classList.remove('fa-xmark');
+                mobileBtn.setAttribute('aria-expanded', 'false');
             });
         });
 
-        // FAQ Accordion
-        const faqToggles = document.querySelectorAll('.faq-toggle');
-        faqToggles.forEach(toggle => {
+        // ── FAQ Accordion (CSS max-height transition) ─────────────────────────
+        document.querySelectorAll('.faq-toggle').forEach(toggle => {
             toggle.addEventListener('click', () => {
-                const content = toggle.nextElementSibling;
-                const icon = toggle.querySelector('i');
-                
-                // Close all other open FAQs
-                faqToggles.forEach(otherToggle => {
-                    if (otherToggle !== toggle) {
-                        otherToggle.nextElementSibling.classList.add('hidden');
-                        otherToggle.querySelector('i').style.transform = 'rotate(0deg)';
-                    }
+                const content   = toggle.nextElementSibling;
+                const isOpen    = toggle.classList.contains('open');
+
+                // Close all
+                document.querySelectorAll('.faq-toggle').forEach(t => {
+                    t.classList.remove('open');
+                    t.nextElementSibling.classList.remove('open');
                 });
 
-                // Toggle current FAQ
-                if (content.classList.contains('hidden')) {
-                    content.classList.remove('hidden');
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    content.classList.add('hidden');
-                    icon.style.transform = 'rotate(0deg)';
+                // Open clicked one (if it wasn't already open)
+                if (!isOpen) {
+                    toggle.classList.add('open');
+                    content.classList.add('open');
                 }
             });
         });
 
-        // Modal Logic
-        const modal = document.getElementById('demoModal');
-        const form = document.getElementById('demoForm');
+        // ── Modal Logic ───────────────────────────────────────────────────────
+        const modal        = document.getElementById('demoModal');
+        const demoForm     = document.getElementById('demoForm');
         const successState = document.getElementById('successState');
 
         function openModal() {
             modal.style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-            // Reset form on open
-            form.style.display = 'block';
-            successState.classList.add('hidden');
-            form.reset();
+            document.body.style.overflow = 'hidden';
+            // Always reset to form view on open
+            demoForm.style.display  = 'block';
+            successState.style.display = 'none';
+            demoForm.reset();
         }
 
         function closeModal() {
             modal.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
+            document.body.style.overflow = 'auto';
         }
 
-        // Close modal if clicked outside of it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'block') closeModal();
+        });
 
         function submitForm(e) {
             e.preventDefault();
-            // Simulate form submission
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...';
-            btn.disabled = true;
+            const submitBtn = demoForm.querySelector('button[type="submit"]');
+            const originalHTML = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Submitting…';
+            submitBtn.disabled  = true;
 
             setTimeout(() => {
-                form.style.display = 'none';
-                successState.classList.remove('hidden');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 1000);
+                demoForm.style.display     = 'none';
+                successState.style.display = 'flex';
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.disabled  = false;
+            }, 1200);
         }
     </script>
 </body>
