@@ -1,0 +1,27 @@
+{
+  "name": "faelo-ai-fullstack",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Faelo AI company website with a Node.js API and PostgreSQL demo-request storage.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:setup": "node scripts/setup-database.js",
+    "test": "node --test",
+    "check": "node scripts/check-project.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "dotenv": "16.6.1",
+    "express": "5.2.1",
+    "express-rate-limit": "7.5.1",
+    "helmet": "8.1.0",
+    "pg": "8.16.3"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
